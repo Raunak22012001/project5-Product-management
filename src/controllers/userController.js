@@ -2,6 +2,7 @@ const userModel = require("../models/userModel");
 const bcrypt = require("bcrypt");
 const jwt = require('jsonwebtoken');
 const { uploadFile } = require("../aws Config/awsConfig");
+const mongoose = require('mongoose')
 const {
   isValidName,
   isValidEmail,
@@ -189,7 +190,7 @@ const createUser = async function (req, res) {
   }
 };
 
-//////////////////////=============================================LogIn ===================================================///////////////
+//////////////////////============================================ LogIn ===================================================///////////////
 
 const login = async function (req, res) {
   try {
@@ -211,7 +212,7 @@ const login = async function (req, res) {
     if (!match) {
       return res.status(400).send({ status: false, data: "Invalid Password" })
     } else {
-      var token = jwt.sign({ user }, 'shoppingCartSecreteKey', { expiresIn: '60s' }); // will expire in 60sec
+      var token = jwt.sign({ user }, 'shoppingCartSecreteKey', { expiresIn: '1hr' }); // will expire in 60sec
       let userId = user._id
       let loginData = { userId, token }
       res.status(200).send({ status: true, message: "User login successfull", data: loginData })
@@ -222,4 +223,29 @@ const login = async function (req, res) {
   }
 };
 
-module.exports = { createUser, login };
+//////////////////////////////////////////////////// fetch User data    //////////////////////////////////////////
+
+const getProfile = async function(req,res){
+
+  try {
+  
+      let userId =req.params.userId
+  
+      if(!mongoose.isValidObjectId(userId)) return res.status(400).send({status:false,message:"invalid user Id"})
+  
+      if(req.tokenID.user._id!=userId)  return res.status(403).send({status:false,message:"unauthorized"})
+  
+      let allProfiles = await userModel.findById(userId)
+      if(!allProfiles) return res.status(404).send({status:false,message:"user id does not exist"})
+      res.status(200).send({status:true,message:"User profile details", data:allProfiles})
+      
+  }
+   catch (error) {
+      return res.status(500).send({ status: false, error: error.message })
+      
+  }
+  
+  
+  }
+
+module.exports = { createUser, login, getProfile};

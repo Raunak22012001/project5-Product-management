@@ -21,60 +21,6 @@ const isValidPassword = function (body) {
   return passwordRegex.test(body);
 };
 
-/////////////////////////////////////////////////// userValidation /////////////////////////////////////////////////////////
-
-// const userValidation = async function (req, res, next) {
-//     try {
-//         let userDetails = req.body
-//         let { fname, lname, email, profileImage, phone, password, address, ...rest } = { ...userDetails };
-//         let { shipping, billing } = { ...address }
-
-//         if (Object.keys(rest) != 0) return res.status(400).send({ status: false, msg: "Please provide required details only => title, name, phone, email, password & address" })
-
-//         next();
-
-//     } catch (error) {
-//         res.status(500).send({ status: false, error: error.message });
-//     }
-// }
-
-//////////////////////////////////////////// Login Validation /////////////////////////////////////////////////////////////
-
-const logInValidation = async function (req, res, next) {
-  try {
-    let data = req.body;
-    let { email, password, ...rest } = { ...data };
-
-    if (Object.keys(rest) != 0)
-      return res
-        .status(400)
-        .send({
-          status: false,
-          msg: "please provide EmaliId and Password only",
-        });
-    if (Object.keys(data) == 0)
-      return res
-        .status(400)
-        .send({ status: false, msg: "Please provide details" });
-
-    if (!email || !password)
-      return res
-        .status(400)
-        .send({ status: false, msg: "Please enter email and password both" });
-
-    next();
-  } catch (error) {
-    res.status(500).send({ status: false, error: error.message });
-  }
-};
-
-
-
-
-
-
-
-
 
 const isValidRequestBody = function (request) {
     return Object.keys(request).length > 0;
@@ -96,9 +42,73 @@ module.exports = {
   isValidPassword,
   isValidRequestBody,
   isValid,
-  isvalidPincode,
-  logInValidation,
+  isvalidPincode
 };
+
+
+
+
+
+
+
+
+
+
+
+/////////////////////////////////////////////////// userValidation /////////////////////////////////////////////////////////
+
+// const userValidation = async function (req, res, next) {
+//     try {
+  //         let userDetails = req.body
+  //         let { fname, lname, email, profileImage, phone, password, address, ...rest } = { ...userDetails };
+  //         let { shipping, billing } = { ...address }
+  
+  //         if (Object.keys(rest) != 0) return res.status(400).send({ status: false, msg: "Please provide required details only => title, name, phone, email, password & address" })
+  
+  //         next();
+  
+  //     } catch (error) {
+    //         res.status(500).send({ status: false, error: error.message });
+    //     }
+    // }
+
+//////////////////////////////////////////// Login Validation /////////////////////////////////////////////////////////////
+
+// const logInValidation = async function (req, res, next) {
+//   try {
+//     let data = req.body;
+//     let { email, password, ...rest } = { ...data };
+
+//     if (Object.keys(rest) != 0)
+//       return res
+//         .status(400)
+//         .send({
+//           status: false,
+//           msg: "please provide EmaliId and Password only",
+//         });
+//     if (Object.keys(data) == 0)
+//       return res
+//         .status(400)
+//         .send({ status: false, msg: "Please provide details" });
+
+//     if (!email || !password)
+//       return res
+//         .status(400)
+//         .send({ status: false, msg: "Please enter email and password both" });
+
+//     next();
+//   } catch (error) {
+//     res.status(500).send({ status: false, error: error.message });
+//   }
+// };
+
+
+
+
+
+
+
+
 
 
 
