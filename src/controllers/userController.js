@@ -1,5 +1,6 @@
 const userModel = require("../models/userModel");
 const bcrypt = require("bcrypt");
+const jwt = require('jsonwebtoken');
 const { uploadFile } = require("../aws Config/awsConfig");
 const {
   isValidName,
@@ -108,7 +109,7 @@ const createUser = async function (req, res) {
         msg: "Password must have 8 to 15 characters with at least one lowercase, uppercase, numeric value and a special character",
       });
 
-    if (address && typeof(address) !== 'object') {
+    if (address && typeof (address) !== 'object') {
       return res
         .status(400)
         .send({ status: false, message: "Address is in wrong format" });
@@ -195,22 +196,27 @@ const login = async function (req, res) {
     let credentials = req.body;
     let { email, password } = { ...credentials };
 
-    let user = await userModel.findOne({ email: email, password: password });
-    if (!user)
-      return res
-        .status(400)
-        .send({ status: false, msg: "incorrect emailId or password" });
+    if (Object.keys(req.body).length == 0) {
+      return res.status(400).send({ status: false, data: "Login Credential required !!!" })
+    }
+    if (!email || !password) {
+      return res.status(400).send({ status: false, data: "Email and Password Both are required..." })
+    }
+    if (!isValidEmail(email)) {
+      return res.status(400).send({ status: false, data: "Invalid Email!!!" })
+    }
+    let user = await userModel.findOne({ email: email });
+    if (!user) return res.status(400).send({ status: false, data: "User Not Found" })
+    const match = await bcrypt.compare(password, user.password);
+    if (!match) {
+      return res.status(400).send({ status: false, data: "Invalid Password" })
+    } else {
+      var token = jwt.sign({ user }, 'shoppingCartSecreteKey', { expiresIn: '60s' }); // will expire in 60sec
+      let userId = user._id
+      let loginData = { userId, token }
+      res.status(200).send({ status: true, message: "User login successfull", data: loginData })
 
-    let token = JWT.sign(
-      {
-        userId: user._id.toString(),
-      },
-      "-- plutonium-- project-product-management -- secret-token --",
-      { expiresIn: "6h" }
-    );
-    res.setHeader("x-api-key", token);
-
-    return res.status(201).send({ status: true, data: token });
+    }
   } catch (err) {
     res.status(500).send({ status: "error", error: err.message });
   }
