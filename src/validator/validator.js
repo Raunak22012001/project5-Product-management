@@ -33,7 +33,9 @@ const isvalidPincode = function (pincode) {
   if (/^[1-9]{1}[0-9]{2}\s{0,1}[0-9]{3}$/.test(pincode)) return true;
   return false;
 };
-
+const isValidObjectId = function (ObjectId) {
+  return mongoose.Types.ObjectId.isValid(ObjectId);
+}
 /////////////////////////////////////////////////// userValidation /////////////////////////////////////////////////////////
 
 
@@ -45,6 +47,7 @@ module.exports = {
   isValidRequestBody,
   isValid,
   isvalidPincode,
+  isValidObjectId,
 };
 
 

@@ -1,7 +1,12 @@
 const productModel = require("../models/productModel");
 const { uploadFile } = require("../aws Config/awsConfig");
 const mongoose = require('mongoose')
+const { isValidObjectId} = require("../validator/validator");
 
+
+
+
+//_____________________________Create product ___________________________________ 
 const createProduct = async function (req, res) {
   try {
     if (Object.keys(req.body).length == 0) {
@@ -93,6 +98,28 @@ const getProductByQuery = async (req, res) => {
     return res.status(500).send({ status: false, error: error.message });
   }
 };
+//_________________get Product by id_______________//
+const getProductsById = async (req, res) => {
+  try {
+      let productId = req.params.productId;
+
+      //checking is product id is valid or not
+      if (!isValidObjectId(productId)) {
+          return res.status(400).send({ status: false, message: 'Please provide valid productId' })
+      }
+
+      //getting the product by it's ID
+      const product = await productModel.findOne({ _id: productId, isDeleted: false }).select({__v:0})
+      if (!product) return res.status(404).send({ status: false, message: "product not found or already deleted" })
+
+      return res.status(200).send({ status: true, message: 'Success', data: product })
+  } catch (err) {
+      res.status(500).send({ status: false, error: err.message })
+  }
+}
+
+
+
 
 const deleteProduct = async (req, res) =>{
   try {
@@ -119,4 +146,4 @@ const deleteProduct = async (req, res) =>{
 
   }
 
-module.exports = { createProduct, getProductByQuery, deleteProduct };
+module.exports = { createProduct, getProductByQuery, deleteProduct ,getProductsById};
