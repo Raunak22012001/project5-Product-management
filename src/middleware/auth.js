@@ -1,26 +1,32 @@
-const JWT = require('jsonwebtoken')
-const UserModel = require('../models/userModel')
-const ObjectId = require('mongoose').Types.ObjectId
+const JWT = require("jsonwebtoken");
+const UserModel = require("../models/userModel");
+const ObjectId = require("mongoose").Types.ObjectId;
 
 //////////////////////////////////////////////////// Authentication //////////////////////////////////////////////////////
 
 const authentication = async (req, res, next) => {
-    try {
-        let token = req.headers.authorization
-        if (!token) return res.status(402).send({ status: false, msg: "token must be present" })
+  try {
+    let token = req.headers.authorization;
+    if (!token)
+      return res
+        .status(401)
+        .send({ status: false, msg: "token must be present" });
 
-        token = token.replace(/^Bearer\s+/, "");
+    token = token.replace(/^Bearer\s+/, "");
 
-        let validateToken = JWT.verify(token, "shoppingCartSecreteKey")
-        if (!validateToken) return res.status(402).send({ status: false, msg: "invalid token" })
+    JWT.verify(token, "shoppingCartSecreteKey", (error, validToken) => {
+      if (error) {
+        return res.status(401).send({ status: false, msg: error.message });
+      } else {
+        req.tokenID = validToken;
+      }
+    });
 
-        req.tokenID = validateToken
-
-        next()
-    } catch (err) {
-        res.status(500).send({ status: "error", error: err.message });
-    }
-}
+    next();
+  } catch (err) {
+    res.status(500).send({ status: "error", error: err.message });
+  }
+};
 
 // //////////////////////////////////////////////////// Authorisation ///////////////////////////////////////////////////////
 
@@ -44,4 +50,4 @@ const authentication = async (req, res, next) => {
 //     }
 // }
 
-module.exports = { authentication }
+module.exports = { authentication };

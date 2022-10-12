@@ -1,4 +1,4 @@
-const UserModel = require("../models/userModel");
+const userModel = require("../models/userModel");
 
 const isValidName = function (body) {
   const nameRegex = /^[a-zA-Z_ ]*$/;
@@ -21,18 +21,29 @@ const isValidPassword = function (body) {
   return passwordRegex.test(body);
 };
 
-
 const isValidRequestBody = function (request) {
-    return Object.keys(request).length > 0;
+  return Object.keys(request).length > 0;
 };
 const isValid = function (value) {
-    if (typeof value === "undefined" || value === null) return false;
-    if (typeof value === "string" && value.trim().length === 0) return false;
-    if (typeof value === "string") return true;
+  if (typeof value === "undefined" || value === null) return false;
+  if (typeof value === "string" && value.trim().length === 0) return false;
+  if (typeof value === "string") return true;
 };
 const isvalidPincode = function (pincode) {
-    if (/^[1-9]{1}[0-9]{2}\s{0,1}[0-9]{3}$/.test(pincode)) return true
-    return false
+  if (/^[1-9]{1}[0-9]{2}\s{0,1}[0-9]{3}$/.test(pincode)) return true;
+  return false;
+};
+
+/////////////////////////////////////////////////// userValidation /////////////////////////////////////////////////////////
+
+const userValidation = async function (req, res, next) {
+  try {
+    
+
+    next();
+  } catch (error) {
+    res.status(500).send({ status: false, error: error.message });
+  }
 };
 
 module.exports = {
@@ -42,36 +53,9 @@ module.exports = {
   isValidPassword,
   isValidRequestBody,
   isValid,
-  isvalidPincode
+  isvalidPincode,
+  userValidation,
 };
-
-
-
-
-
-
-
-
-
-
-
-/////////////////////////////////////////////////// userValidation /////////////////////////////////////////////////////////
-
-// const userValidation = async function (req, res, next) {
-//     try {
-  //         let userDetails = req.body
-  //         let { fname, lname, email, profileImage, phone, password, address, ...rest } = { ...userDetails };
-  //         let { shipping, billing } = { ...address }
-  
-  //         if (Object.keys(rest) != 0) return res.status(400).send({ status: false, msg: "Please provide required details only => title, name, phone, email, password & address" })
-  
-  //         next();
-  
-  //     } catch (error) {
-    //         res.status(500).send({ status: false, error: error.message });
-    //     }
-    // }
-
 //////////////////////////////////////////// Login Validation /////////////////////////////////////////////////////////////
 
 // const logInValidation = async function (req, res, next) {
@@ -101,21 +85,6 @@ module.exports = {
 //     res.status(500).send({ status: false, error: error.message });
 //   }
 // };
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 // / if (!fname) return res.status(400).send({ status: false, message: "fname is required" })
 // if (!isValid(fname)) return res.status(400).send({ status: false, message: "fname is not empty" })
@@ -191,22 +160,6 @@ module.exports = {
 
 // module.exports = { createUser }
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 // const isValidEmail = function (body) {
 //     const emailRegex = /^\w+([\.-]?\w+)@\w+([\.-]?\w+)(\.\w{2,3})+$/;
 //     return emailRegex.test(body)
@@ -221,4 +174,3 @@ module.exports = {
 //     let regex = /^(?=.[0-9])(?=.[!@#$%^&])[a-zA-Z0-9!@#$%^&]{8,15}$/;
 //     return regex.test(value)
 // }
-
