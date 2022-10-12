@@ -36,15 +36,6 @@ const isvalidPincode = function (pincode) {
 
 /////////////////////////////////////////////////// userValidation /////////////////////////////////////////////////////////
 
-const userValidation = async function (req, res, next) {
-  try {
-    
-
-    next();
-  } catch (error) {
-    res.status(500).send({ status: false, error: error.message });
-  }
-};
 
 module.exports = {
   isValidName,
@@ -54,8 +45,18 @@ module.exports = {
   isValidRequestBody,
   isValid,
   isvalidPincode,
-  userValidation,
 };
+
+
+// const userValidation = async function (req, res, next) {
+//   try {
+    
+
+//     next();
+//   } catch (error) {
+//     res.status(500).send({ status: false, error: error.message });
+//   }
+// };
 //////////////////////////////////////////// Login Validation /////////////////////////////////////////////////////////////
 
 // const logInValidation = async function (req, res, next) {
