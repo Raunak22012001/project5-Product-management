@@ -1,58 +1,69 @@
-const mongoose = require('mongoose')
+const mongoose = require("mongoose");
 
-const productSchema = new mongoose.Schema({
+const productSchema = new mongoose.Schema(
+  {
+    title: {
+      type: String,
+      required: true,
+      unique: true,
+      trim: true,
+    },
+    description: {
+      type: String,
+      required: true,
+      trim: true,
+    },
+    price: {
+      type: Number,
+      multipleOf: 0.01,
+      required: true,
+    },
+    currencyId: {
+      type: String,
+      required: true,
+      trim: true,
+    },
+    currencyFormat: {
+      type: String,
+      required: true,
+      trim: true,
+    },
+    isFreeShipping: {
+      type: Boolean,
+      default: false,
+      trim: true,
+    },
+    productImage: {
+      type: String,
+      required: true,
+      trim: true,
+    },
+    style: {
+      type: String,
+      trim: true,
+    },
+    availableSizes: {
+      type: [{ type: String }],
+      enum: ["S", "XS", "M", "X", "L", "XXL", "XL"],
+      required: true,
+    },
 
-    title:{
-        type:String,
-        required:true,
-        unique:true
+    installments: {
+      type: Number,
     },
-    description:{
-        type:String,
-        required:true,
+    isDeleted: {
+      type: Boolean,
+      default: false,
     },
-    price:{
-        type:Number,
-        multipleOf: 0.01,
-        required:true,
+    deletedAt: {
+      type: Date,
+      default: null,
     },
-    currencyId:{
-        type:String,
-        required:true
-    },
-    currencyFormat:{
-        type:String,
-        required:true
-    },
-    isFreeShipping:{
-        type:Boolean,
-        default:false
-    },
-    productImage:{
-        type:String,
-        required:true
-    },
-    style:{
-        type:String
-    },
-    availableSizes:{
-        type:String,
-        enum : ["S","XS","M","X","L","XXL","XL"]
-    },
-    installments:{
-        type:Number,
-    },
-    deletedAt:{
-        type:Date,
-    },
-    isDeleted:{
-        type:Boolean,
-        default:false
-    },
-}, {timestamps:true})
+  },
+  { timestamps: true }
+);
 
-
-module.exports = mongoose.model("Product", userSchema)
+module.exports = mongoose.model("Product", productSchema);
 
 //     title: {string, mandatory, unique},
 //   description: {string, mandatory},
@@ -64,7 +75,7 @@ module.exports = mongoose.model("Product", userSchema)
 //   style: {string},
 //   availableSizes: {array of string, at least one size, enum["S", "XS","M","X", "L","XXL", "XL"]},
 //   installments: {number},
-//   deletedAt: {Date, when the document is deleted}, 
+//   deletedAt: {Date, when the document is deleted},
 //   isDeleted: {boolean, default: false},
 //   createdAt: {timestamp},
 //   updatedAt: {timestamp},
