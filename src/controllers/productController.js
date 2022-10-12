@@ -1,5 +1,6 @@
 const productModel = require("../models/productModel");
 const { uploadFile } = require("../aws Config/awsConfig");
+const mongoose = require('mongoose')
 
 const createProduct = async function (req, res) {
   try {
@@ -93,4 +94,29 @@ const getProductByQuery = async (req, res) => {
   }
 };
 
-module.exports = { createProduct, getProductByQuery };
+const deleteProduct = async (req, res) =>{
+  try {
+
+    let productId = req.params.productId
+
+    let ObjectId = mongoose.Types.ObjectId;
+
+    if(!(ObjectId.isValid(productId))){
+      return res.status(400).send({status:false, message: "Ivalid product Id"})
+    }else{
+      let deleteProduct = await productModel.findOneAndUpdate({_id:productId, isDeleted:false},{$set:{isDeleted:true}},{new:true})
+
+      if(!deleteProduct){
+        return res.status(400).send({status:false, message: "Product Does Not exists!!!"})
+      }else{
+        return res.status(200).send({status:true, message: "Success" ,data:deleteProduct})
+      }
+
+    }
+  } catch (error) {
+    return res.status(500).send({status:false, message: error.message})
+  }
+
+  }
+
+module.exports = { createProduct, getProductByQuery, deleteProduct };
