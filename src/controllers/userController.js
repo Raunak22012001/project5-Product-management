@@ -187,7 +187,7 @@ const createUser = async function (req, res) {
 const login = async function (req, res) {
   try {
     let credentials = req.body;
-    let { email, password } = { credentials };
+    let { email, password } = { ...credentials };
 
     if (Object.keys(req.body).length == 0) {
       return res
