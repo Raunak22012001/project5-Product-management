@@ -14,15 +14,15 @@ const authentication = async (req, res, next) => {
 
     token = token.replace(/^Bearer\s+/, "");
 
-    JWT.verify(token, "shoppingCartSecreteKey", (error, validToken) => {
+    JWT.verify(token, "shoppingCartSecreteKey", function (error, validToken) {
       if (error) {
         return res.status(401).send({ status: false, msg: error.message });
       } else {
-        req.tokenID = validToken;
+        req.token = validToken;
+        next();
       }
     });
 
-    next();
   } catch (err) {
     res.status(500).send({ status: "error", error: err.message });
   }

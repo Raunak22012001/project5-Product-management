@@ -11,7 +11,7 @@ const {
   isValidRequestBody,
   isValid,
   isvalidPincode,
-  isValidObjectId
+  isValidObjectId,
 } = require("../validator/validator");
 
 /////===================================  Create User ===========================================//////
@@ -155,7 +155,6 @@ const createUser = async function (req, res) {
         .status(400)
         .send({ status: false, message: "billing city pincode  is required" });
 
-
     const hashedPassword = await bcrypt.hash(req.body.password, 10);
 
     let uploadedFileURL;
@@ -265,101 +264,134 @@ const getProfile = async function (req, res) {
 
 const updateUser = async (req, res) => {
   try {
-    let address = JSON.parse(req.body.address);
-
     ///-------- validation ----------///
 
-    if (!isValidName(req.body.fname))
-      return res.status(400).send({ status: false, msg: "Invalid fname" });
-    if (!isValidName(req.body.lname))
-      return res.status(400).send({ status: false, msg: "Invalid lname" });
+    let hashedPassword;
+    let uploadedFileURL;
+    let address;
 
-    if (!isValidEmail(req.body.email))
-      return res.status(400).send({ status: false, msg: "Invalid email" });
-    const isEmailAlreadyUsed = await userModel.findOne({
-      email: req.body.email,
-    });
-    if (isEmailAlreadyUsed)
-      return res
-        .status(404)
-        .send({ status: false, msg: "Email is already used" });
 
-    if (!isValidPhone(req.body.phone))
-      return res.status(400).send({ status: false, msg: "Invalid phone" });
-    const isPhoneAlreadyUsed = await userModel.findOne({
-      phone: req.body.phone,
-    });
-    if (isPhoneAlreadyUsed)
-      return res
-        .status(404)
-        .send({ status: false, msg: "Phone is already used" });
-
-    if (!isValidPassword(req.body.password))
-      return res.status(400).send({
-        status: false,
-        msg: "Password must have 8 to 15 characters with at least one lowercase, uppercase, numeric value and a special character",
-      });
-
-    if (address && typeof address !== "object") {
-      return res
-        .status(400)
-        .send({ status: false, message: "Address is in wrong format" });
+    if (req.body.fname) {
+      if (!isValidName(req.body.fname))
+        return res.status(400).send({ status: false, msg: "Invalid fname" });
+    }
+    if (req.body.lname) {
+      if (!isValidName(req.body.lname))
+        return res.status(400).send({ status: false, msg: "Invalid lname" });
     }
 
-    if (!isValidRequestBody(address.shipping))
-      return res
-        .status(400)
-        .send({ status: false, message: "shipping address is required" });
-
-    if (!isValid(address.shipping.street))
-      return res.status(400).send({
-        status: false,
-        message: "street is required in shipping address!",
+    if (req.body.email) {
+      if (!isValidEmail(req.body.email))
+        return res.status(400).send({ status: false, msg: "Invalid email" });
+      const isEmailAlreadyUsed = await userModel.findOne({
+        email: req.body.email,
       });
+      if (isEmailAlreadyUsed)
+        return res
+          .status(404)
+          .send({ status: false, msg: "Email is already used" });
+    }
 
-    if (!isValid(address.shipping.city))
-      return res
-        .status(400)
-        .send({ status: false, message: "shipping city is required" });
-
-    if (!isvalidPincode(address.shipping.pincode))
-      return res
-        .status(400)
-        .send({ status: false, message: "shipping city pincode  is required" });
-
-    if (!isValidRequestBody(address.billing))
-      return res
-        .status(400)
-        .send({ status: false, message: "billing address is required" });
-
-    if (!isValid(address.billing.street))
-      return res.status(400).send({
-        status: false,
-        message: "street is required in billing address!",
+    if (req.body.phone) {
+      if (!isValidPhone(req.body.phone))
+        return res.status(400).send({ status: false, msg: "Invalid phone" });
+      const isPhoneAlreadyUsed = await userModel.findOne({
+        phone: req.body.phone,
       });
+      if (isPhoneAlreadyUsed)
+        return res
+          .status(404)
+          .send({ status: false, msg: "Phone is already used" });
+    }
 
-    if (!isValid(address.billing.city))
-      return res.status(400).send({
-        status: false,
-        message: "billing city is required in billing address",
-      });
+    if (req.body.password) {
+      if (!isValidPassword(req.body.password))
+        return res.status(400).send({
+          status: false,
+          msg: "Password must have 8 to 15 characters with at least one lowercase, uppercase, numeric value and a special character",
+        });
+      hashedPassword = await bcrypt.hash(req.body.password, 10);
+    }
 
-    if (!isvalidPincode(address.billing.pincode))
-      return res
-        .status(400)
-        .send({ status: false, message: "billing city pincode  is required" });
+    if (req.body.address) {
+      address = JSON.parse(req.body.address);
+      if (address && typeof address !== "object") {
+        return res
+          .status(400)
+          .send({ status: false, message: "Address is in wrong format" });
+      }
 
-    if (req.tokenID.user._id != req.params.userId)
+      if (address.shipping) {
+        if (!isValidRequestBody(address.shipping))
+          return res
+            .status(400)
+            .send({ status: false, message: "shipping address is required" });
+
+        if (address.shipping.street) {
+          if (!isValid(address.shipping.street))
+            return res.status(400).send({
+              status: false,
+              message: "street is required in shipping address!",
+            });
+        }
+        if (address.shipping.city) {
+          if (!isValid(address.shipping.city))
+            return res
+              .status(400)
+              .send({ status: false, message: "shipping city is required" });
+        }
+
+        if (address.shipping.pincode) {
+          if (!isvalidPincode(address.shipping.pincode))
+            return res.status(400).send({
+              status: false,
+              message: "shipping city pincode  is required",
+            });
+        }
+      }
+
+      if (address.billing) {
+        if (!isValidRequestBody(address.billing))
+          return res
+            .status(400)
+            .send({ status: false, message: "billing address is required" });
+
+        if (address.billing.street) {
+          if (!isValid(address.billing.street))
+            return res.status(400).send({
+              status: false,
+              message: "street is required in billing address!",
+            });
+        }
+
+        if (address.billing.city) {
+          if (!isValid(address.billing.city))
+            return res.status(400).send({
+              status: false,
+              message: "billing city is required in billing address",
+            });
+        }
+
+        if (address.billing.pincode) {
+          if (!isvalidPincode(address.billing.pincode))
+            return res.status(400).send({
+              status: false,
+              message: "billing city pincode  is required",
+            });
+        }
+      }
+    }
+
+    if (req.token.user._id != req.params.userId)
       return res.status(403).send({ status: false, message: "unauthorized" });
 
-    const hashedPassword = await bcrypt.hash(req.body.password, 10);
 
-    let uploadedFileURL;
-
-    if (req.files && req.files.length > 0) {
-      uploadedFileURL = await uploadFile(req.files[0]);
-    } else {
-      res.status(400).send({ msg: "No file found" });
+    if (req.body.profileImage) {
+      if (req.files && req.files.length > 0) {
+        uploadedFileURL = await uploadFile(req.files[0]);
+      } else {
+        res.status(400).send({ msg: "No file found" });
+      }
     }
 
     let updateuser = await userModel.findOneAndUpdate(
