@@ -242,7 +242,7 @@ const getProfile = async function (req, res) {
         .status(400)
         .send({ status: false, message: "invalid user Id" });
 
-    if (req.tokenID.user._id != req.params.userId)
+    if (req.token.user._id != req.params.userId)
       return res.status(403).send({ status: false, message: "unauthorized" });
 
     let allProfiles = await userModel.findById(req.params.userId);
