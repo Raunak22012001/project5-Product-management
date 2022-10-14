@@ -11,7 +11,6 @@ const {
   isValidRequestBody,
   isValid,
   isvalidPincode,
-  isValidObjectId,
 } = require("../validator/validator");
 
 /////===================================  Create User ===========================================//////
@@ -46,7 +45,19 @@ const createUser = async function (req, res) {
         .status(400)
         .send({ status: false, msg: "address is required" });
     }
-    let address = JSON.parse(req.body.address);
+    
+    let address =  JSON.parse(req.body.address);
+
+    if (!address.shipping) {
+      return res
+      .status(400)
+      .send({ status: false, msg: "shipping address is required" });
+    }
+    if (!address.billing) {
+      return res
+        .status(400)
+        .send({ status: false, msg: "billing address is required" });
+    }
 
     if (!address.shipping.street)
       return res

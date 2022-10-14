@@ -4,6 +4,14 @@ const isValidName = function (body) {
   const nameRegex = /^[a-zA-Z_ ]*$/;
   return nameRegex.test(body);
 };
+const isValidprice = function (body) {
+  const nameRegex = /^\d{0,8}[.]?\d{1,4}$/;
+  return nameRegex.test(body);
+};
+const isValidInstallment = function (body) {
+  const nameRegex = /^[0-9]+$/;
+  return nameRegex.test(body);
+};
 
 const isValidPhone = function (body) {
   const phoneRegex = /^[6-9]\d{9}$/;
@@ -35,9 +43,8 @@ const isvalidPincode = function (pincode) {
 };
 const isValidObjectId = function (ObjectId) {
   return mongoose.Types.ObjectId.isValid(ObjectId);
-}
+};
 /////////////////////////////////////////////////// userValidation /////////////////////////////////////////////////////////
-
 
 module.exports = {
   isValidName,
@@ -48,12 +55,12 @@ module.exports = {
   isValid,
   isvalidPincode,
   isValidObjectId,
+  isValidprice,
+  isValidInstallment,
 };
-
 
 // const userValidation = async function (req, res, next) {
 //   try {
-    
 
 //     next();
 //   } catch (error) {

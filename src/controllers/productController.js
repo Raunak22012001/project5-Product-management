@@ -3,13 +3,8 @@ const { uploadFile } = require("../aws Config/awsConfig");
 const mongoose = require("mongoose");
 const {
   isValidName,
-  isValidPhone,
-  isValidEmail,
-  isValidPassword,
-  isValidRequestBody,
-  isValid,
-  isvalidPincode,
-  isValidObjectId,
+  isValidprice,
+  isValidInstallment,
 } = require("../validator/validator");
 
 //_____________________________Create product ___________________________________
@@ -23,7 +18,15 @@ const createProduct = async function (req, res) {
         .send({ status: false, msg: "Please provide details" });
     }
 
-    let { title, description, price, currencyId, currencyFormat } = { ...data };
+    let {
+      title,
+      description,
+      price,
+      currencyId,
+      currencyFormat,
+      installments,
+      isFreeShipping,
+    } = { ...data };
 
     let files = req.files;
 
@@ -93,6 +96,11 @@ const createProduct = async function (req, res) {
         .status(400)
         .send({ status: false, msg: "Invalid description" });
 
+    if (!isValidprice(price))
+      return res
+        .status(400)
+        .send({ status: false, msg: "Price must be Numeric or Decimal" });
+
     if (currencyId !== "INR")
       return res
         .status(400)
@@ -102,6 +110,16 @@ const createProduct = async function (req, res) {
       return res
         .status(400)
         .send({ status: false, msg: "currencyFormat must be in ₹" });
+
+    if (isFreeShipping && !(typeof isFreeShipping == Boolean))
+      return res
+        .status(400)
+        .send({ status: false, msg: "isFreeShipping must be boolean" });
+
+    if (!isValidInstallment(installments))
+      return res
+        .status(400)
+        .send({ status: false, msg: "installments must be Numeric" });
 
     let uploadedFileURL;
 
@@ -123,38 +141,55 @@ const createProduct = async function (req, res) {
 
 const getProductByQuery = async (req, res) => {
   try {
+    let { name, size, priceGreaterThan, priceLessThan, priceSort, ...rest } = {
+      ...req.query,
+    };
+
+    if (Object.keys(rest).length != 0) {
+      return res.status(400).send({
+        status: false,
+        msg: "Filter data through keys name, size, priceGreaterThan, priceLessThan, priceSort must be Numeric",
+      });
+    }
     let data = { isDeleted: false };
 
-    if (req.query.priceGreaterThan) {
-      // if(){
-
-      // }
-      let pric = parseFloat(req.query.priceGreaterThan);
+    if (priceGreaterThan) {
+      let pric = parseFloat(priceGreaterThan);
+      if (!isValidprice(priceGreaterThan)) {
+        return res
+          .status(400)
+          .send({ status: false, msg: "priceGreaterThan must be Numeric" });
+      }
       data.price = { $gt: pric };
     }
 
-    if (req.query.priceLessThan) {
-      let pric = parseFloat(req.query.priceLessThan);
+    if (priceLessThan) {
+      let pric = parseFloat(priceLessThan);
+      if (!isValidprice(priceLessThan)) {
+        return res
+          .status(400)
+          .send({ status: false, msg: "priceLessThan must be Numeric" });
+      }
       data.price = { $lt: pric };
     }
 
-    if (req.query.priceGreaterThan && req.query.priceLessThan) {
-      let pric = parseFloat(req.query.priceGreaterThan);
-      let pri = parseFloat(req.query.priceLessThan);
+    if (priceGreaterThan && priceLessThan) {
+      let pric = parseFloat(priceGreaterThan);
+      let pri = parseFloat(priceLessThan);
       data.price = { $gt: pric, $lt: pri };
     }
 
-    if (req.query.size) {
-      req.query.size = JSON.parse(req.query.size);
-      if (!Array.isArray(req.query.size)) {
+    if (size) {
+      size = JSON.parse(size);
+      if (!Array.isArray(size)) {
         return res.status(400).send({
           status: false,
           message: "size should be in array format: [X, M,L]",
         });
       }
-      if (Array.isArray(req.query.size) && req.query.size.length > 0) {
-        for (let i = 0; i < req.query.size.length; i++) {
-          const element = req.query.size[i];
+      if (Array.isArray(size) && size.length > 0) {
+        for (let i = 0; i < size.length; i++) {
+          const element = size[i];
 
           if (!["S", "XS", "M", "X", "L", "XXL", "XL"].includes(element)) {
             return res.status(400).send({
@@ -163,11 +198,11 @@ const getProductByQuery = async (req, res) => {
             });
           }
         }
-        data.availableSizes = { $in: req.query.size };
+        data.availableSizes = { $in: size };
       }
     }
-    if (req.query.name) {
-      const regexForName = new RegExp(req.query.name, "i");
+    if (name) {
+      const regexForName = new RegExp(name, "i");
       data.title = { $regex: regexForName };
     }
 
@@ -177,11 +212,11 @@ const getProductByQuery = async (req, res) => {
       return res.status(404).send({ status: false, msg: "No Product found" });
     }
 
-    if (req.query.priceSort == 1) {
+    if (priceSort == 1) {
       allProducts.sort((a, b) => {
         return a.price - b.price;
       });
-    } else if (req.query.priceSort == -1) {
+    } else if (priceSort == -1) {
       allProducts.sort((a, b) => {
         return b.price - a.price;
       });
@@ -265,13 +300,43 @@ const updateProduct = async function (req, res) {
     // if (req.body.currencyFormat && req.body.currencyFormat !== "₹")
     // return res.status(400).send({ status: false, msg: "currencyFormat must be in ₹" })
 
-    if (title && !isValidName(title))
-      return res.status(400).send({ status: false, msg: "Invalid title" });
+    if (title) {
+      if (!isValidName(title)) {
+        return res.status(400).send({ status: false, msg: "Invalid title" });
+      }
 
+      const isTitleAlreadyUsed = await productModel.findOne({
+        title,
+      });
+      if (isTitleAlreadyUsed)
+        return res
+          .status(404)
+          .send({ status: false, msg: "Title is already used" });
+    }
     if (description && !isValidName(description))
       return res
         .status(400)
         .send({ status: false, msg: "Invalid description" });
+
+    if (price && !isValidprice(price))
+      return res
+        .status(400)
+        .send({ status: false, msg: "Price must be Numeric or Decimal" });
+
+    if (
+      isFreeShipping &&
+      isFreeShipping != "true" &&
+      isFreeShipping != "false"
+    ) {
+      return res
+        .status(400)
+        .send({ status: false, msg: "isFreeShipping must be boolean" });
+    }
+
+    if (installments && !isValidInstallment(installments))
+      return res
+        .status(400)
+        .send({ status: false, msg: "installments must be Numeric" });
 
     let availableSizes;
     if (details.availableSizes) {
