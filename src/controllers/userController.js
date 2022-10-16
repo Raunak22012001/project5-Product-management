@@ -281,6 +281,9 @@ const updateUser = async (req, res) => {
     let uploadedFileURL;
     let address;
 
+    if (Object.keys(req.body).length === 0) {
+      return res.status(400).send({ status: false, msg: "Please provide details which you want to update"  });
+    }
 
     if (req.body.fname) {
       if (!isValidName(req.body.fname))
@@ -397,13 +400,9 @@ const updateUser = async (req, res) => {
       return res.status(403).send({ status: false, message: "unauthorized" });
 
 
-    if (req.body.profileImage) {
-      if (req.files && req.files.length > 0) {
+      if (req.files && req.files.length > 0 && req.files[0].fieldname == "profileImage") {
         uploadedFileURL = await uploadFile(req.files[0]);
-      } else {
-        res.status(400).send({ msg: "No file found" });
       }
-    }
 
     let updateuser = await userModel.findOneAndUpdate(
       { _id: req.params.userId },
