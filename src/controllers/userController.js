@@ -45,13 +45,13 @@ const createUser = async function (req, res) {
         .status(400)
         .send({ status: false, msg: "address is required" });
     }
-    
-    let address =  JSON.parse(req.body.address);
+
+    let address = JSON.parse(req.body.address);
 
     if (!address.shipping) {
       return res
-      .status(400)
-      .send({ status: false, msg: "shipping address is required" });
+        .status(400)
+        .send({ status: false, msg: "shipping address is required" });
     }
     if (!address.billing) {
       return res
@@ -102,7 +102,7 @@ const createUser = async function (req, res) {
         .send({ status: false, msg: "Email is already used" });
 
     if (!isValidPhone(req.body.phone))
-      return res.status(400).send({ status: false, msg: "Invalid phone" });
+      return res.status(400).send({ status: false, msg: "Invalid phone should start from 6,7,8,9 only" });
     const isPhoneAlreadyUsed = await userModel.findOne({
       phone: req.body.phone,
     });
@@ -279,10 +279,24 @@ const updateUser = async (req, res) => {
 
     let hashedPassword;
     let uploadedFileURL;
-    let address;
+    // let address;
+
+    if (!mongoose.isValidObjectId(req.params.userId))
+      return res
+        .status(400)
+        .send({ status: false, message: "invalid user Id" });
 
     if (Object.keys(req.body).length === 0) {
-      return res.status(400).send({ status: false, msg: "Please provide details which you want to update"  });
+      return res.status(400).send({ status: false, msg: "Please provide details which you want to update" });
+    }
+
+    let { fname, lname, email, phone, password, address, profileImage, ...rest } = { ...req.body }
+
+    if (Object.keys(rest).length != 0) {
+      return res.status(400).send({
+        status: false,
+        msg: "Please provide details among these fname, lname, email, phone, password, address, profileImage which you want to update",
+      });
     }
 
     if (req.body.fname) {
@@ -400,9 +414,9 @@ const updateUser = async (req, res) => {
       return res.status(403).send({ status: false, message: "unauthorized" });
 
 
-      if (req.files && req.files.length > 0 && req.files[0].fieldname == "profileImage") {
-        uploadedFileURL = await uploadFile(req.files[0]);
-      }
+    if (req.files && req.files.length > 0 && req.files[0].fieldname == "profileImage") {
+      uploadedFileURL = await uploadFile(req.files[0]);
+    }
 
     let updateuser = await userModel.findOneAndUpdate(
       { _id: req.params.userId },

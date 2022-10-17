@@ -18,15 +18,14 @@ const createProduct = async function (req, res) {
         .send({ status: false, msg: "Please provide details" });
     }
 
-    let {
-      title,
-      description,
-      price,
-      currencyId,
-      currencyFormat,
-      installments,
-      isFreeShipping,
-    } = { ...data };
+    let { title, description, price, currencyId, currencyFormat, installments, isFreeShipping, productImage, style, availableSizes, ...rest } = { ...data };
+
+    if (Object.keys(rest).length != 0) {
+      return res.status(400).send({
+        status: false,
+        msg: "Data required are title description price currencyId currencyFormat image style availableSizes installments isFreeShipping"
+      });
+    }
 
     let files = req.files;
 
@@ -38,14 +37,14 @@ const createProduct = async function (req, res) {
         .send({ status: false, msg: "description is required" });
     if (!price)
       return res.status(400).send({ status: false, msg: "price is required" });
-    // if (!currencyId)
-    //   return res
-    //     .status(400)
-    //     .send({ status: false, msg: "currencyId is required" });
-    // if (!currencyFormat)
-    //   return res
-    //     .status(400)
-    //     .send({ status: false, msg: "currencyFormat is required" });
+    if (!currencyId)
+      return res
+        .status(400)
+        .send({ status: false, msg: "currencyId is required" });
+    if (!currencyFormat)
+      return res
+        .status(400)
+        .send({ status: false, msg: "currencyFormat is required" });
 
     if (files.length === 0)
       return res
@@ -57,7 +56,7 @@ const createProduct = async function (req, res) {
         .status(400)
         .send({ status: false, msg: "availableSizes is required" });
 
-    let availableSizes = req.body.availableSizes.split(",");
+    availableSizes = req.body.availableSizes.split(",");
 
     // if (!Array.isArray(availableSizes)) {
     //   return res.status(400).send({
@@ -73,7 +72,7 @@ const createProduct = async function (req, res) {
         if (!["S", "XS", "M", "X", "L", "XXL", "XL"].includes(element)) {
           return res.status(400).send({
             status: false,
-            message: `available sizes must be from:  [S, XS, M, X, L, XXL, XL] without any spaces`,
+            message: `available sizes must be from: S, XS, M, X, L, XXL, XL without any spaces`,
           });
         }
       }
@@ -101,15 +100,27 @@ const createProduct = async function (req, res) {
         .status(400)
         .send({ status: false, msg: "Price must be Numeric or Decimal (upto 4 digits)" });
 
-    if (currencyId && currencyId !== "INR")
-      return res
-        .status(400)
-        .send({ status: false, msg: "crrencyId must be INR" });
+    // if (currencyId != 'INR' || currencyId != 'USD')
+    //   return res
+    //     .status(400)
+    //     .send({ status: false, msg: "currencyId must be INR or USD" })
 
-    if (currencyFormat && currencyFormat !== "₹")
+
+    // if (currencyFormat != '₹' || currencyFormat != '$')
+    //   return res
+    //     .status(400)
+    //     .send({ status: false, msg: "currencyFormat must be in ₹ or $" });
+
+    if (currencyId == 'INR' && currencyFormat != '₹') {
       return res
         .status(400)
-        .send({ status: false, msg: "currencyFormat must be in ₹" });
+        .send({ status: false, msg: "currencyFormat must be in ₹ for INR" });
+    }
+    if (currencyId == 'USD' && currencyFormat != '$') {
+      return res
+        .status(400)
+        .send({ status: false, msg: "currencyFormat must be in $ for USD" });
+    }
 
     if (isFreeShipping && isFreeShipping !== "true" && isFreeShipping !== "false")
       return res
@@ -188,17 +199,17 @@ const getProductByQuery = async (req, res) => {
       //   });
       // }
       // if (Array.isArray(size) && size.length > 0) {
-        for (let i = 0; i < size.length; i++) {
-          const element = size[i];
+      for (let i = 0; i < size.length; i++) {
+        const element = size[i];
 
-          if (!["S", "XS", "M", "X", "L", "XXL", "XL"].includes(element)) {
-            return res.status(400).send({
-              status: false,
-              message: `available sizes should be from:  S, XS, M, X, L, XXL, XL`,
-            });
-          }
+        if (!["S", "XS", "M", "X", "L", "XXL", "XL"].includes(element)) {
+          return res.status(400).send({
+            status: false,
+            message: `available sizes should be from:  S, XS, M, X, L, XXL, XL`,
+          });
         }
-        data.availableSizes = { $in: size };
+      }
+      data.availableSizes = { $in: size };
       // }
     }
     if (name) {
@@ -271,24 +282,22 @@ const updateProduct = async function (req, res) {
       return res.status(400).send({ status: false, msg: "Please provide details which you want to update" })
     }
 
-    let {
-      title,
-      description,
-      price,
-      currencyId,
-      currencyFormat,
-      isFreeShipping,
-      style,
-      installments,
-    } = { ...details };
+    let { title, description, price, currencyId, currencyFormat, isFreeShipping, style, installments, ...rest } = { ...details };
+
+    if (Object.keys(rest).length != 0) {
+      return res.status(400).send({
+        status: false,
+        msg: "Details for updation must be among these title, description, price, currencyId, currencyFormat, isFreeShipping, style, installments ",
+      });
+    }
 
     if (!mongoose.isValidObjectId(productId))
       return res
         .status(400)
         .send({ status: false, message: "Ivalid productId" });
 
-      if (req.body.currencyId && req.body.currencyId !== "INR")
-    return res.status(400).send({ status: false, msg: "crrencyId must be INR" })
+    if (req.body.currencyId && req.body.currencyId !== "INR")
+      return res.status(400).send({ status: false, msg: "crrencyId must be INR" })
 
     if (currencyId)
       return res
@@ -301,7 +310,7 @@ const updateProduct = async function (req, res) {
         .send({ status: false, msg: "You can't change currencyFormat" });
 
     if (req.body.currencyFormat && req.body.currencyFormat !== "₹")
-    return res.status(400).send({ status: false, msg: "currencyFormat must be in ₹" })
+      return res.status(400).send({ status: false, msg: "currencyFormat must be in ₹" })
 
     if (title) {
       if (!isValidName(title)) {
