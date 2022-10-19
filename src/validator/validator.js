@@ -50,7 +50,7 @@ const isValidObjectId = function (ObjectId) {
 };
 
 const isValidStatus = function (status) {
-  return ["pending", "completed", "cancelled"].indexOf(status) == -1;
+  return ["pending", "completed", "cancelled"].indexOf(status) !== -1;
 };
 
 /////////////////////////////////////////////////// userValidation /////////////////////////////////////////////////////////

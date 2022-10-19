@@ -44,7 +44,7 @@ const createorder = async (req, res) => {
             return res.status(404).send({ status: false, message: "user not found" });
 
 
-        let cartData = await cartModel.findOne({ _id: cartId }).select({_id:0})
+        let cartData = await cartModel.findOne({ _id: cartId }).select({ _id: 0 })
         if (!cartData)
             return res.status(404).send({ status: false, message: "cart not found" });
 
@@ -84,11 +84,15 @@ const updateorder = async (req, res) => {
                 message: "Extra data provided...Please provide only productId or productId and cartId from body",
             });
 
-        // if (!isValidStatus(status)) return res.status(400).send({ status: false, message: "status must be among these pending, completed, cancelled " })
+        if (!isValidStatus(status))
+            return res.status(400).send({ status: false, message: "status must be among these pending, completed, cancelled " })
 
         let isUserExist = await userModel.findOne({ _id: userId })
         if (!isUserExist)
             return res.status(404).send({ status: false, message: "user not found" });
+
+        if (req.token.user._id != req.params.userId)
+            return res.status(403).send({ status: false, message: "unauthorized" });
 
 
         let isOrderExist = await orderModel.findOne({ _id: orderId, isDeleted: false })
@@ -111,11 +115,9 @@ const updateorder = async (req, res) => {
             let cartData = await cartModel.findOneAndUpdate(
                 { userId },
                 { $set: { items: [], totalPrice: 0, totalItems: 0 } },
-                {new: true}
+                { new: true }
             )
         }
-
-
 
         return res.status(200).send({ status: true, message: "success", data: updatedorder })
     } catch (error) {
