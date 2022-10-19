@@ -53,36 +53,58 @@ const createUser = async function (req, res) {
         .status(400)
         .send({ status: false, msg: "shipping address is required" });
     }
+    if (typeof(address.shipping) != "object")
+      return res
+        .status(400)
+        .send({ status: false, message: "shipping address must be object type" });
+
     if (!address.billing) {
       return res
         .status(400)
         .send({ status: false, msg: "billing address is required" });
     }
+    if (typeof(address.shipping) != "object")
+      return res
+        .status(400)
+        .send({ status: false, message: "billing address must be object type" });
 
     if (!address.shipping.street)
       return res
         .status(400)
         .send({ status: false, msg: "shipping street is required" });
+
+    if (!isValid(address.shipping.street)) {
+      return res.status(400).send({
+        status: false,
+        message: " shipping street must be string",
+      });
+    }
+
     if (!address.shipping.city)
       return res
         .status(400)
         .send({ status: false, msg: "shipping city is required" });
+
     if (!address.shipping.pincode)
       return res
         .status(400)
         .send({ status: false, msg: "shipping pincode is required" });
+
     if (!address.billing.street)
       return res
         .status(400)
         .send({ status: false, msg: "billing street is required" });
+
     if (!address.billing.city)
       return res
         .status(400)
         .send({ status: false, msg: "billing city is required" });
+
     if (!address.billing.pincode)
       return res
         .status(400)
         .send({ status: false, msg: "billing pincode is required" });
+
 
     ///-------- validation ----------///
 
@@ -120,34 +142,23 @@ const createUser = async function (req, res) {
     if (address && typeof address !== "object") {
       return res
         .status(400)
-        .send({ status: false, message: "Address is in wrong format" });
+        .send({ status: false, message: "Address must be object type" });
     }
 
-    if (!isValidRequestBody(address.shipping))
-      return res
-        .status(400)
-        .send({ status: false, message: "shipping address is required" });
 
-    if (!isValid(address.shipping.street))
-      return res.status(400).send({
-        status: false,
-        message: "street is required in shipping address!",
-      });
+
 
     if (!isValid(address.shipping.city))
       return res
         .status(400)
-        .send({ status: false, message: "shipping city is required" });
+        .send({ status: false, message: "shipping city must be string" });
 
     if (!isvalidPincode(address.shipping.pincode))
       return res
         .status(400)
         .send({ status: false, message: "shipping city pincode  is required" });
 
-    if (!isValidRequestBody(address.billing))
-      return res
-        .status(400)
-        .send({ status: false, message: "billing address is required" });
+
 
     if (!isValid(address.billing.street))
       return res.status(400).send({
@@ -229,7 +240,7 @@ const login = async function (req, res) {
       return res.status(400).send({ status: false, data: "Invalid Password" });
     } else {
       var token = jwt.sign({ user }, "shoppingCartSecreteKey", {
-        expiresIn: "1hr",
+        expiresIn: "12hr",
       }); // will expire in 1hr
       let userId = user._id;
       let loginData = { userId, token };

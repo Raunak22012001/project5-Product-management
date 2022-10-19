@@ -41,7 +41,7 @@ const createCart = async (req, res) => {
             });
         }
 
-        let isUserExist = await userModel.findOne({ _id: userId, isDeleted: false })
+        let isUserExist = await userModel.findOne({ _id: userId })
         if (!isUserExist) {
             return res.status(404).send({ status: false, message: "user not found" });
         }
@@ -52,13 +52,13 @@ const createCart = async (req, res) => {
         }
 
         if (cartId) {
-            let isCartExist = await cartModel.findOne({ _id: cartId, isDeleted: false });
+            let isCartExist = await cartModel.findOne({ _id: cartId });
             if (!isCartExist) {
                 return res.status(404).send({ status: false, message: "cart not found" });
             }
         }
 
-        let userAlreadyHaveCart = await cartModel.findOne({ userId, isDeleted: false });
+        let userAlreadyHaveCart = await cartModel.findOne({ userId });
         if (userAlreadyHaveCart && !cartId) {
             return res.status(400).send({ status: false, message: "Please provide cartId, cart exist for this user" });
         }
@@ -71,18 +71,15 @@ const createCart = async (req, res) => {
             let prod
             cartObj.items.map(x => { if (x.productId == productId) prod = x.productId })
             if (prod) {
-                if (prod.toString() === productId) {
-
-                    let update = await cartModel.findOneAndUpdate(
-                        { _id: userAlreadyHaveCart._id, "items.productId": prod, isDeleted: false },
-                        { $inc: { "items.$.quantity": 1, totalPrice: productData.price } },
-                        { new: true }
-                    ).populate('items.productId').select({ __v: 0 });
-                    return res.status(201).send({ status: true, message: "success", data: update })
-                }
+                let update = await cartModel.findOneAndUpdate(
+                    { _id: cartId, "items.productId": prod },
+                    { $inc: { "items.$.quantity": 1, totalPrice: productData.price } },
+                    { new: true }
+                ).populate('items.productId').select({ __v: 0 });
+                return res.status(201).send({ status: true, message: "success", data: update })
             } else {
                 let update = await cartModel.findOneAndUpdate(
-                    { _id: userAlreadyHaveCart._id, isDeleted: false },
+                    { _id: cartId },
                     {
                         $push: {
                             items: {
@@ -94,7 +91,6 @@ const createCart = async (req, res) => {
                     }, { new: true }
                 ).populate('items.productId').select({ __v: 0 });
                 return res.status(201).send({ status: true, message: "success", data: update })
-
             }
         }
 
@@ -152,7 +148,7 @@ const updatecart = async (req, res) => {
             });
         }
 
-        let isUserExist = await userModel.findOne({ _id: userId, isDeleted: false })
+        let isUserExist = await userModel.findOne({ _id: userId })
         if (!isUserExist) {
             return res.status(404).send({ status: false, message: "user not found" });
         }
@@ -162,7 +158,7 @@ const updatecart = async (req, res) => {
             return res.status(404).send({ status: false, message: "product not found" });
         }
 
-        let userAlreadyHaveCart = await cartModel.findOne({ _id: cartId, isDeleted: false })
+        let userAlreadyHaveCart = await cartModel.findOne({ _id: cartId })
         if (!userAlreadyHaveCart) {
             return res.status(404).send({ status: false, message: "cart not found" });
         }
@@ -170,16 +166,25 @@ const updatecart = async (req, res) => {
         if (req.token.user._id != req.params.userId)
             return res.status(403).send({ status: false, message: "unauthorized" });
 
+        let cartObj = userAlreadyHaveCart.toObject()
+        let quantity
+        cartObj.items.map(x => { if (x.productId == productId) quantity = x.quantity })
 
-        if (removeProduct == 1) {
+        let product_id
+        cartObj.items.map(x => { if (x.productId == productId) product_id = x._id })
+        if (!product_id) {
+            return res.status(404).send({ status: false, message: "Product not found" })
+        }
+
+        if (removeProduct == 1 && quantity > 1) {
             let update = await cartModel.findOneAndUpdate(
-                { _id: cartId, "items.productId": productId, isDeleted: false },
+                { _id: cartId, "items.productId": productId },
                 { $inc: { "items.$.quantity": -1, totalPrice: -(productData.price) } },
                 { new: true }
             ).populate('items.productId').select({ __v: 0 });
             return res.status(201).send({ status: true, message: "success", data: update })
-        } else if (removeProduct == 0) {
-            let cartObj = userAlreadyHaveCart.toObject()
+
+        } else if (removeProduct == 0 || quantity == 1) {
             let quantity
             cartObj.items.map(x => { if (x.productId == productId) quantity = x.quantity })
             let product_id
@@ -192,7 +197,7 @@ const updatecart = async (req, res) => {
                     },
                     $inc: { totalPrice: -((productData.price) * quantity), totalItems: -1 }
                 }, { new: true }
-            ).populate('items.productId').select({ __v: 0 });
+            ).populate('items.productId').select({ __v: 0});
             return res.status(201).send({ status: true, message: "success", data: updateCart })
         }
 
@@ -256,7 +261,7 @@ const deleteCart = async (req, res) => {
                 { userId: userId, isDeleted: false },
                 { $set: { items: [], totalItems: 0, totalPrice: 0 } },
                 { new: true });
-            return res.status(200).send({ status: true, message: "Cart Deleted Succesfully", data: deletedCart });
+            return res.status(204).send({ status: true, message: "Cart Deleted Succesfully", data: deletedCart });
         }
     } catch (err) {
         return res.status(500).send({ status: false, message: err.message });
