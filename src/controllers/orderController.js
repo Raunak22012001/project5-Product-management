@@ -13,9 +13,9 @@ const createorder = async (req, res) => {
         let { cartId, ...rest } = req.body;
 
 
-        if (Object.keys(req.body).length === 0) {
+        if (Object.keys(req.body).length === 0)
             return res.status(400).send({ status: false, message: "Request body empty... Please provide data for input" })
-        }
+
         if (Object.keys(rest).length != 0)
             return res.status(400).send({
                 status: false,
@@ -44,7 +44,7 @@ const createorder = async (req, res) => {
             return res.status(404).send({ status: false, message: "user not found" });
 
 
-        let cartData = await cartModel.findOne({ _id: cartId })
+        let cartData = await cartModel.findOne({ _id: cartId }).select({_id:0})
         if (!cartData)
             return res.status(404).send({ status: false, message: "cart not found" });
 
@@ -73,7 +73,18 @@ const createorder = async (req, res) => {
 const updateorder = async (req, res) => {
     try {
         let userId = req.params.userId;
-        let { orderId, status } = req.body;
+        let { orderId, status, ...rest } = req.body;
+
+        if (Object.keys(req.body).length === 0)
+            return res.status(400).send({ status: false, message: "Request body empty... Please provide data for input" })
+
+        if (Object.keys(rest).length != 0)
+            return res.status(400).send({
+                status: false,
+                message: "Extra data provided...Please provide only productId or productId and cartId from body",
+            });
+
+        // if (!isValidStatus(status)) return res.status(400).send({ status: false, message: "status must be among these pending, completed, cancelled " })
 
         let isUserExist = await userModel.findOne({ _id: userId })
         if (!isUserExist)
@@ -95,6 +106,14 @@ const updateorder = async (req, res) => {
             { $set: { status: status } },
             { new: true }
         )
+
+        if (updatedorder.status == "completed") {
+            let cartData = await cartModel.findOneAndUpdate(
+                { userId },
+                { $set: { items: [], totalPrice: 0, totalItems: 0 } },
+                {new: true}
+            )
+        }
 
 
 
