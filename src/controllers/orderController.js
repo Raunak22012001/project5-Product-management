@@ -53,6 +53,10 @@ const createorder = async (req, res) => {
         let cartData = await cartModel.findOne({ _id: cartId }).select({ _id: 0 })
         if (!cartData)
             return res.status(404).send({ status: false, message: "cart not found" });
+        let usersCart = await cartModel.findOne({ _id: cartId, userId: userId })
+        if (!usersCart) {
+            return res.status(400).send({ status: false, message: "Cart doesn't belongs to this user" });
+        }
 
         if (!cartData.totalItems)
             return res.status(404).send({ status: false, message: "cart is empty" });
@@ -121,6 +125,16 @@ const updateorder = async (req, res) => {
 
         if (!isOrderExist)
             return res.status(404).send({ status: false, message: "order not found" })
+        let usersOrder = await orderModel.findOne({ _id: orderId, userId: userId })
+        if (!usersOrder) {
+            return res.status(400).send({ status: false, message: "order doesn't belongs to this user" });
+        }
+        if (usersOrder.status == 'completed') {
+            return res.status(400).send({ status: false, message: "order already completed" });
+        }
+        if (usersOrder.status == 'cancelled') {
+            return res.status(400).send({ status: false, message: "order already cancelled" });
+        }
 
         if (status == "cancelled") {
             if (isOrderExist.cancellable == false)
@@ -128,7 +142,7 @@ const updateorder = async (req, res) => {
         }
 
         let updatedorder = await orderModel.findOneAndUpdate(
-            { id: orderId, },
+            { _id: orderId, },
             { $set: { status: status } },
             { new: true }
         )

@@ -188,6 +188,12 @@ const updatecart = async (req, res) => {
         if (!userAlreadyHaveCart) {
             return res.status(404).send({ status: false, message: "cart not found" });
         }
+        if (cartId) {
+            let usersCart = await cartModel.findOne({ _id: cartId, userId: userId })
+            if (!usersCart) {
+                return res.status(400).send({ status: false, message: "Cart doesn't belongs to this user" });
+            }
+        } 
         if (userAlreadyHaveCart.totalItems == 0) {
             return res.status(400).send({ status: false, message: "cart is empty... add items into cart" });
         }
@@ -211,7 +217,7 @@ const updatecart = async (req, res) => {
                 { $inc: { "items.$.quantity": -1, totalPrice: -(productData.price) } },
                 { new: true }
             ).populate('items.productId').select({ __v: 0 });
-            return res.status(201).send({ status: true, message: "Success", data: update })
+            return res.status(200).send({ status: true, message: "Success", data: update })
 
         } else if (removeProduct == 0 || quantity == 1) {
             let quantity
@@ -227,7 +233,7 @@ const updatecart = async (req, res) => {
                     $inc: { totalPrice: -((productData.price) * quantity), totalItems: -1 }
                 }, { new: true }
             ).populate('items.productId').select({ __v: 0 });
-            return res.status(201).send({ status: true, message: "Success", data: updateCart })
+            return res.status(200).send({ status: true, message: "Success", data: updateCart })
         }
 
 
