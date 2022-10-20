@@ -65,7 +65,7 @@ const createProduct = async function (req, res) {
       }
       data.availableSizes = availableSizes;
     }
-    if (!isValidTitle(title))
+    if (!isValid(title))
       return res.status(400).send({ status: false, message: "Invalid title" });
 
     const isTitleAlreadyUsed = await productModel.findOne({
@@ -124,7 +124,7 @@ const createProduct = async function (req, res) {
     data.productImage = uploadedFileURL;
 
     const savedData = await productModel.create(data);
-    return res.status(201).send({ status: true, message: "success", data: savedData });
+    return res.status(201).send({ status: true, message: "Success", data: savedData });
   } catch (error) {
     return res.status(500).send({ status: false, error: error.message });
   }
@@ -202,7 +202,7 @@ const getProductByQuery = async (req, res) => {
       });
     }
 
-    return res.status(200).send({ status: true, message: "success", data: allProducts });
+    return res.status(200).send({ status: true, message: "Success", data: allProducts });
   } catch (error) {
     return res.status(500).send({ status: false, error: error.message });
   }
@@ -323,7 +323,7 @@ const updateProduct = async function (req, res) {
       return res.status(404).send({ status: false, message: "Product not found" });
     }
 
-    return res.status(200).send({ status: true, message: "success", data: updatedProduct, });
+    return res.status(200).send({ status: true, message: "Success", data: updatedProduct, });
   } catch (error) {
     return res.status(500).send({ status: false, message: error.message });
   }
@@ -349,7 +349,7 @@ const deleteProduct = async (req, res) => {
           .status(400)
           .send({ status: false, message: "Product Does Not exists!!!" });
       } else {
-        return res.status(200).send({ status: true, message: "Success", data: "Product deleted successfully!" });
+        return res.status(200).send({ status: true, message: "Success", data: "Product deleted Successfully!" });
       }
     }
   } catch (error) {

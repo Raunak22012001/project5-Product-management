@@ -63,6 +63,12 @@ const createCart = async (req, res) => {
             return res.status(400).send({ status: false, message: "Cart already exist, Please provide cartId" });
         }
 
+        let usersCart =  await cartModel.findOne({ _id: cartId, userId: userId })
+        if (!usersCart) {
+            return res.status(400).send({ status: false, message: "Cart doesn't belongs to this user" });
+        }
+
+
         if (req.token.user._id != req.params.userId)
             return res.status(403).send({ status: false, message: "unauthorized" });
 
@@ -76,7 +82,7 @@ const createCart = async (req, res) => {
                     { $inc: { "items.$.quantity": 1, totalPrice: productData.price } },
                     { new: true }
                 ).populate('items.productId').select({ __v: 0 });
-                return res.status(201).send({ status: true, message: "success", data: update })
+                return res.status(201).send({ status: true, message: "Success", data: update })
             } else {
                 let update = await cartModel.findOneAndUpdate(
                     { _id: cartId },
@@ -90,7 +96,7 @@ const createCart = async (req, res) => {
                         $inc: { totalPrice: productData.price, totalItems: 1 }
                     }, { new: true }
                 ).populate('items.productId').select({ __v: 0 });
-                return res.status(201).send({ status: true, message: "success", data: update })
+                return res.status(201).send({ status: true, message: "Success", data: update })
             }
         }
 
@@ -104,7 +110,7 @@ const createCart = async (req, res) => {
 
         let createCart = await cartModel.create(createData)
         let sendData = await cartModel.findOne({ userId }).populate('items.productId').select({ __v: 0 });
-        return res.status(201).send({ status: true, message: "success", data: sendData })
+        return res.status(201).send({ status: true, message: "Success", data: sendData })
 
     } catch (error) {
         return res.status(500).send({ status: false, error: error.message });
@@ -204,7 +210,7 @@ const updatecart = async (req, res) => {
                 { $inc: { "items.$.quantity": -1, totalPrice: -(productData.price) } },
                 { new: true }
             ).populate('items.productId').select({ __v: 0 });
-            return res.status(201).send({ status: true, message: "success", data: update })
+            return res.status(201).send({ status: true, message: "Success", data: update })
 
         } else if (removeProduct == 0 || quantity == 1) {
             let quantity
@@ -220,7 +226,7 @@ const updatecart = async (req, res) => {
                     $inc: { totalPrice: -((productData.price) * quantity), totalItems: -1 }
                 }, { new: true }
             ).populate('items.productId').select({ __v: 0 });
-            return res.status(201).send({ status: true, message: "success", data: updateCart })
+            return res.status(201).send({ status: true, message: "Success", data: updateCart })
         }
 
 
@@ -247,7 +253,7 @@ const getCart = async function (req, res) {
         let findCart = await cartModel.findOne({ userId: userId }).populate('items.productId').select({ __v: 0 });
         if (!findCart) return res.status(404).send({ status: false, message: `No cart found with this "" userId` });
 
-        return res.status(200).send({ status: true, message: "success", data: findCart })
+        return res.status(200).send({ status: true, message: "Success", data: findCart })
 
     } catch (err) {
         return res.status(500).send({ status: false, message: err.message });

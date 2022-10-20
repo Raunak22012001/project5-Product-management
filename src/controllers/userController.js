@@ -195,7 +195,7 @@ const createUser = async function (req, res) {
     req.body.address = address;
 
     const savedData = await userModel.create(req.body);
-    return res.status(201).send({ status: true, message: "success", data: savedData });
+    return res.status(201).send({ status: true, message: "Success", data: savedData });
   } catch (error) {
     return res.status(500).send({ status: false, error: error.message });
   }
@@ -239,7 +239,7 @@ const login = async function (req, res) {
 
     let user = await userModel.findOne({ email: email });
     if (!user)
-      return res.status(400).send({ status: false, data: "User Not Found" });
+      return res.status(404).send({ status: false, data: "User Not Found" });
     const match = await bcrypt.compare(password, user.password);
     if (!match) {
       return res.status(400).send({ status: false, data: "Invalid Password" });
@@ -251,7 +251,7 @@ const login = async function (req, res) {
       let loginData = { userId, token };
       res.status(200).send({
         status: true,
-        message: "success",
+        message: "Success",
         data: loginData,
       });
     }

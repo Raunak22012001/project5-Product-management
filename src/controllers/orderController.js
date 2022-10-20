@@ -72,7 +72,7 @@ const createorder = async (req, res) => {
 
 
         let createdOrder = await orderModel.create(cartDataObj)
-        return res.status(201).send({ status: true, message: "success", data: createdOrder })
+        return res.status(201).send({ status: true, message: "Success", data: createdOrder })
 
     } catch (error) {
         return res.status(500).send({ status: false, error: error.message });
@@ -141,7 +141,7 @@ const updateorder = async (req, res) => {
             )
         }
 
-        return res.status(200).send({ status: true, message: "success", data: updatedorder })
+        return res.status(200).send({ status: true, message: "Success", data: updatedorder })
     } catch (error) {
         return res.status(500).send({ status: false, error: error.message });
     }
