@@ -160,7 +160,7 @@ const updatecart = async (req, res) => {
             });
         }
 
-        if (removeProduct > 1) {
+        if (removeProduct > 1 || removeProduct < 0) {
             return res.status(400).send({
                 status: false,
                 message: "removeProduct can only be 0 or 1",
@@ -180,6 +180,9 @@ const updatecart = async (req, res) => {
         let userAlreadyHaveCart = await cartModel.findOne({ _id: cartId })
         if (!userAlreadyHaveCart) {
             return res.status(404).send({ status: false, message: "cart not found" });
+        }
+        if (userAlreadyHaveCart.totalItems == 0) {
+            return res.status(400).send({ status: false, message: "cart is empty... add items into cart" });
         }
 
         if (req.token.user._id != req.params.userId)
@@ -216,7 +219,7 @@ const updatecart = async (req, res) => {
                     },
                     $inc: { totalPrice: -((productData.price) * quantity), totalItems: -1 }
                 }, { new: true }
-            ).populate('items.productId').select({ __v: 0});
+            ).populate('items.productId').select({ __v: 0 });
             return res.status(201).send({ status: true, message: "success", data: updateCart })
         }
 
@@ -275,6 +278,8 @@ const deleteCart = async (req, res) => {
         let isCart = await cartModel.findOne({ userId: userId });
         if (!isCart) {
             return res.status(404).send({ status: false, message: "cart not found" });
+        } else if (isCart.totalItems == 0) {
+            return res.status(400).send({ status: false, message: "cart empty!" });
         } else {
             let deletedCart = await cartModel.findOneAndUpdate(
                 { userId: userId, isDeleted: false },

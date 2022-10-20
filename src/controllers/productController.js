@@ -112,7 +112,7 @@ const createProduct = async function (req, res) {
     let uploadedFileURL;
 
     if (req.files && req.files.length > 0) {
-      if (!isValidImage(files[0]))
+      if (!isValidImage(files[0].originalname))
         return res
           .status(400)
           .send({ status: false, message: "productImage must be of extention .jpg,.jpeg,.bmp,.gif,.png" });
@@ -295,7 +295,7 @@ const updateProduct = async function (req, res) {
     }
 
     if (req.files && req.files.length > 0  && req.files[0].fieldname == "productImage") {
-      if (!isValidImage(files[0]))
+      if (!isValidImage(files[0].originalname))
         return res
           .status(400)
           .send({ status: false, message: "productImage must be of extention .jpg,.jpeg,.bmp,.gif,.png" });

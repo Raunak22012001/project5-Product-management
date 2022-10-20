@@ -19,7 +19,7 @@ const createorder = async (req, res) => {
         if (Object.keys(rest).length != 0)
             return res.status(400).send({
                 status: false,
-                message: "Extra data provided...Please provide only productId or productId and cartId from body",
+                message: "Extra data provided...Please provide only cartId or cancellable from body",
             });
 
 
@@ -43,7 +43,6 @@ const createorder = async (req, res) => {
                 return res
                     .status(400)
                     .send({ status: false, message: "cancellabe must be type boolean" });
-
 
 
         let isUserExist = await userModel.findOne({ _id: userId })
@@ -94,7 +93,7 @@ const updateorder = async (req, res) => {
         if (Object.keys(rest).length != 0)
             return res.status(400).send({
                 status: false,
-                message: "Extra data provided...Please provide only productId or productId and cartId from body",
+                message: "Extra data provided...Please provide only orderId and status from body",
             });
 
         if (!mongoose.isValidObjectId(userId))
@@ -125,7 +124,7 @@ const updateorder = async (req, res) => {
 
         if (status == "cancelled") {
             if (isOrderExist.cancellable == false)
-                return res.status(400).send({ status: false, message: "order can't be cancelled" })
+                return res.status(400).send({ status: false, message: "This order can't be cancelled" })
         }
 
         let updatedorder = await orderModel.findOneAndUpdate(
