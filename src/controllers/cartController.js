@@ -132,9 +132,9 @@ const updatecart = async (req, res) => {
             return res.status(400).send({ status: false, message: "Please provide cartId" })
         }
 
-        // if (!removeProduct) {
-        //     return res.status(400).send({ status: false, message: "Please provide removeProduct" })
-        // }
+        if (!Object.keys(req.body).includes('removeProduct')) {
+            return res.status(400).send({ status: false, message: "Please provide removeProduct" })
+        }
 
         if (!mongoose.isValidObjectId(userId))
             return res
@@ -160,12 +160,12 @@ const updatecart = async (req, res) => {
             });
         }
 
-        // if (removeProduct != '0' || removeProduct != '1') {
-        //     return res.status(400).send({
-        //         status: false,
-        //         message: "removeProduct can only be 0 or 1",
-        //     });
-        // }
+        if (removeProduct > 1) {
+            return res.status(400).send({
+                status: false,
+                message: "removeProduct can only be 0 or 1",
+            });
+        }
 
         let isUserExist = await userModel.findOne({ _id: userId })
         if (!isUserExist) {

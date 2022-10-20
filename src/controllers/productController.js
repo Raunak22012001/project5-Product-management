@@ -1,7 +1,7 @@
 const productModel = require("../models/productModel");
 const { uploadFile } = require("../aws Config/awsConfig");
 const mongoose = require("mongoose");
-const { isValidTitle, isValidprice, isValidInstallment, isValidDescription } = require("../validator/validator");
+const { isValidTitle, isValidprice, isValidImage, isValidInstallment, isValidDescription } = require("../validator/validator");
 
 //_____________________________Create product ___________________________________//
 const createProduct = async function (req, res) {
