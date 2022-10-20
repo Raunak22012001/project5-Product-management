@@ -10,7 +10,7 @@ const { isValidStatus } = require('../validator/validator')
 const createorder = async (req, res) => {
     try {
         let userId = req.params.userId;
-        let { cartId, ...rest } = req.body;
+        let { cartId, cancellable, ...rest } = req.body;
 
 
         if (Object.keys(req.body).length === 0)
@@ -38,6 +38,13 @@ const createorder = async (req, res) => {
                 .status(400)
                 .send({ status: false, message: "Ivalid cartid" });
 
+        if (Object.keys(req.body).includes('cancellable'))
+            if (typeof (cancellable) != 'boolean')
+                return res
+                    .status(400)
+                    .send({ status: false, message: "cancellabe must be type boolean" });
+
+
 
         let isUserExist = await userModel.findOne({ _id: userId })
         if (!isUserExist)
@@ -48,6 +55,10 @@ const createorder = async (req, res) => {
         if (!cartData)
             return res.status(404).send({ status: false, message: "cart not found" });
 
+        if (!cartData.totalItems)
+            return res.status(404).send({ status: false, message: "cart is empty" });
+
+
         if (req.token.user._id != req.params.userId)
             return res.status(403).send({ status: false, message: "unauthorized" });
 
@@ -57,6 +68,8 @@ const createorder = async (req, res) => {
         cartDataObj.items.map(x => totalQuantity += x.quantity)
         cartDataObj.totalQuantity = totalQuantity
 
+        if (Object.keys(req.body).includes('cancellable'))
+            cartDataObj.cancellable = cancellable
 
 
         let createdOrder = await orderModel.create(cartDataObj)
@@ -73,7 +86,7 @@ const createorder = async (req, res) => {
 const updateorder = async (req, res) => {
     try {
         let userId = req.params.userId;
-        let { orderId, status, ...rest } = req.body;
+        let { orderId, status, cancellable, ...rest } = req.body;
 
         if (Object.keys(req.body).length === 0)
             return res.status(400).send({ status: false, message: "Request body empty... Please provide data for input" })
@@ -83,6 +96,16 @@ const updateorder = async (req, res) => {
                 status: false,
                 message: "Extra data provided...Please provide only productId or productId and cartId from body",
             });
+
+        if (!mongoose.isValidObjectId(userId))
+            return res
+                .status(400)
+                .send({ status: false, message: "Ivalid userId" });
+
+        if (!mongoose.isValidObjectId(orderId))
+            return res
+                .status(400)
+                .send({ status: false, message: "Ivalid orderId" });
 
         if (!isValidStatus(status))
             return res.status(400).send({ status: false, message: "status must be among these pending, completed, cancelled " })
@@ -98,7 +121,7 @@ const updateorder = async (req, res) => {
         let isOrderExist = await orderModel.findOne({ _id: orderId, isDeleted: false })
 
         if (!isOrderExist)
-            return res.send(404).send({ status: false, message: "order not found" })
+            return res.status(404).send({ status: false, message: "order not found" })
 
         if (status == "cancelled") {
             if (isOrderExist.cancellable == false)
@@ -127,3 +150,5 @@ const updateorder = async (req, res) => {
 
 
 module.exports = { createorder, updateorder }
+
+//becrypt,aws,redis
