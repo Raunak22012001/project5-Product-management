@@ -1,9 +1,9 @@
 const productModel = require("../models/productModel");
 const { uploadFile } = require("../aws Config/awsConfig");
 const mongoose = require("mongoose");
-const { isValidTitle, isValidprice, isValidImage, isValidInstallment, isValidDescription } = require("../validator/validator");
+const { isValidTitle, isValidprice, isValidImage, isValid, isValidInstallment, isValidDescription } = require("../validator/validator");
 
-//_____________________________Create product ___________________________________//
+//_____________________________________Create product ______________________________________________//
 const createProduct = async function (req, res) {
   try {
     let data = req.body;
@@ -323,7 +323,7 @@ const updateProduct = async function (req, res) {
       return res.status(404).send({ status: false, message: "Product not found" });
     }
 
-    return res.status(200).send({ status: true, message: "Success", data: updatedProduct, });
+    return res.status(200).send({ status: true, message: "Update product details is successful", data: updatedProduct, });
   } catch (error) {
     return res.status(500).send({ status: false, message: error.message });
   }
