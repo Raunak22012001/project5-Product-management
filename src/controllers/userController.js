@@ -318,7 +318,7 @@ const updateUser = async (req, res) => {
     }
     const userDetails = await userModel.findOne({ _id: req.params.userId });
     if (!userDetails) {
-      return res.status(400).send({ status: false, message: "user not exist" })
+      return res.status(404).send({ status: false, message: "user not exist" })
     }
 
     if (fname) {
