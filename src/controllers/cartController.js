@@ -63,11 +63,12 @@ const createCart = async (req, res) => {
             return res.status(400).send({ status: false, message: "Cart already exist, Please provide cartId" });
         }
 
-        let usersCart =  await cartModel.findOne({ _id: cartId, userId: userId })
-        if (!usersCart) {
-            return res.status(400).send({ status: false, message: "Cart doesn't belongs to this user" });
-        }
-
+        if (cartId) {
+            let usersCart = await cartModel.findOne({ _id: cartId, userId: userId })
+            if (!usersCart) {
+                return res.status(400).send({ status: false, message: "Cart doesn't belongs to this user" });
+            }
+        }
 
         if (req.token.user._id != req.params.userId)
             return res.status(403).send({ status: false, message: "unauthorized" });
