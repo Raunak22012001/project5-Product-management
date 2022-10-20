@@ -195,7 +195,7 @@ const createUser = async function (req, res) {
     req.body.address = address;
 
     const savedData = await userModel.create(req.body);
-    return res.status(201).send({ status: true, message: savedData });
+    return res.status(201).send({ status: true, message:"success", data:savedData });
   } catch (error) {
     return res.status(500).send({ status: false, error: error.message });
   }
@@ -251,7 +251,7 @@ const login = async function (req, res) {
       let loginData = { userId, token };
       res.status(200).send({
         status: true,
-        message: "User login successfull",
+        message: "success",
         data: loginData,
       });
     }
@@ -279,7 +279,7 @@ const getProfile = async function (req, res) {
         .send({ status: false, message: "user id does not exist" });
     res.status(200).send({
       status: true,
-      message: "User profile details",
+      message: "Success",
       data: allProfiles,
     });
   } catch (error) {
@@ -456,7 +456,7 @@ const updateUser = async (req, res) => {
 
     return res.status(200).send({
       status: true,
-      message: "User profile updated",
+      message: "Success",
       data: updateuser,
     });
   } catch (error) {
