@@ -53,7 +53,12 @@ const createorder = async (req, res) => {
         let cartData = await cartModel.findOne({ _id: cartId }).select({ _id: 0 })
         if (!cartData)
             return res.status(404).send({ status: false, message: "cart not found" });
+
         let usersCart = await cartModel.findOne({ _id: cartId, userId: userId })
+
+        if (req.token.user._id != req.params.userId)
+            return res.status(403).send({ status: false, message: "unauthorized" });
+
         if (!usersCart) {
             return res.status(400).send({ status: false, message: "Cart doesn't belongs to this user" });
         }
@@ -62,8 +67,6 @@ const createorder = async (req, res) => {
             return res.status(404).send({ status: false, message: "cart is empty" });
 
 
-        if (req.token.user._id != req.params.userId)
-            return res.status(403).send({ status: false, message: "unauthorized" });
 
         let cartDataObj = cartData.toObject()
 
@@ -116,6 +119,10 @@ const updateorder = async (req, res) => {
         let isUserExist = await userModel.findOne({ _id: userId })
         if (!isUserExist)
             return res.status(404).send({ status: false, message: "user not found" });
+
+        let cartData = await cartModel.findOne({ userId }).select({ _id: 0 })
+        if (!cartData)
+            return res.status(404).send({ status: false, message: "cart not found" });
 
         if (req.token.user._id != req.params.userId)
             return res.status(403).send({ status: false, message: "unauthorized" });
