@@ -60,7 +60,7 @@ const createCart = async (req, res) => {
 
         let userAlreadyHaveCart = await cartModel.findOne({ userId });
         if (userAlreadyHaveCart && !cartId) {
-            return res.status(400).send({ status: false, message: "Please provide cartId, cart exist for this user" });
+            return res.status(400).send({ status: false, message: "Cart already exist, Please provide cartId" });
         }
 
         if (req.token.user._id != req.params.userId)
@@ -121,8 +121,20 @@ const updatecart = async (req, res) => {
         let { productId, cartId, removeProduct, ...rest } = req.body
 
         if (Object.keys(req.body).length === 0) {
-            return res.status(400).send({ status: false, messgae: "Request body empty... Please provide data for input" })
+            return res.status(400).send({ status: false, message: "Request body empty... Please provide data for input" })
         }
+
+        if (!productId) {
+            return res.status(400).send({ status: false, message: "Please provide productId" })
+        }
+
+        if (!cartId) {
+            return res.status(400).send({ status: false, message: "Please provide cartId" })
+        }
+
+        // if (!removeProduct) {
+        //     return res.status(400).send({ status: false, message: "Please provide removeProduct" })
+        // }
 
         if (!mongoose.isValidObjectId(userId))
             return res
@@ -147,6 +159,13 @@ const updatecart = async (req, res) => {
                 message: "Extra data provided...Please provide only productId, cartId and removeProduct from body",
             });
         }
+
+        // if (removeProduct != '0' || removeProduct != '1') {
+        //     return res.status(400).send({
+        //         status: false,
+        //         message: "removeProduct can only be 0 or 1",
+        //     });
+        // }
 
         let isUserExist = await userModel.findOne({ _id: userId })
         if (!isUserExist) {

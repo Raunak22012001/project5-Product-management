@@ -195,7 +195,7 @@ const createUser = async function (req, res) {
     req.body.address = address;
 
     const savedData = await userModel.create(req.body);
-    return res.status(201).send({ status: true, message:"success", data:savedData });
+    return res.status(201).send({ status: true, message: "success", data: savedData });
   } catch (error) {
     return res.status(500).send({ status: false, error: error.message });
   }
@@ -269,15 +269,18 @@ const getProfile = async function (req, res) {
         .status(400)
         .send({ status: false, message: "invalid user Id" });
 
-    if (req.token.user._id != req.params.userId)
-      return res.status(403).send({ status: false, message: "unauthorized" });
+
 
     let allProfiles = await userModel.findById(req.params.userId);
     if (!allProfiles)
       return res
         .status(404)
         .send({ status: false, message: "user id does not exist" });
-    res.status(200).send({
+
+    if (req.token.user._id != req.params.userId)
+      return res.status(403).send({ status: false, message: "unauthorized" });
+
+    return res.status(200).send({
       status: true,
       message: "Success",
       data: allProfiles,
@@ -388,7 +391,7 @@ const updateUser = async (req, res) => {
               status: false,
               message: "pincode must be numeric in shipping address!",
             });
-            userDetailsObj.address.shipping.pincode = address.shipping.pincode
+          userDetailsObj.address.shipping.pincode = address.shipping.pincode
         }
 
       }
