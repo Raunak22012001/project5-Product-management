@@ -39,15 +39,18 @@ const isValidPassword = function (body) {
 const isValidRequestBody = function (request) {
   return Object.keys(request).length > 0;
 };
+
 const isValid = function (value) {
   if (typeof value === "undefined" || value === null) return false;
   if (typeof value === "string" && value.trim().length === 0) return false;
   if (typeof value === "string") return true;
 };
+
 const isvalidPincode = function (pincode) {
   if (/^[1-9]{1}[0-9]{2}\s{0,1}[0-9]{3}$/.test(pincode)) return true;
   return false;
 };
+
 const isValidObjectId = function (ObjectId) {
   return mongoose.Types.ObjectId.isValid(ObjectId);
 };

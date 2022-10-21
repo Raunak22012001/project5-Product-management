@@ -122,7 +122,7 @@ const createUser = async function (req, res) {
 
     if (isEmailAlreadyUsed)
       return res
-        .status(404)
+        .status(400)
         .send({ status: false, message: "Email is already used" });
 
     if (!isValidPhone(phone))
@@ -133,7 +133,7 @@ const createUser = async function (req, res) {
 
     if (isPhoneAlreadyUsed)
       return res
-        .status(404)
+        .status(400)
         .send({ status: false, message: "Phone is already used" });
 
     if (!isValidPassword(password))
